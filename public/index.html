@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bus Break Dashboard</title>
+  <style>
+      body { font-family: sans-serif; padding: 20px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+<h1>🚌 Buses Currently on Break</h1>
+<table id="busTable">
+  <thead>
+  <tr>
+    <th>Bus Name</th>
+    <th>Route ID</th>
+    <th>Break Duration (seconds)</th>
+    <th>Total Break Time (sec)</th>
+  </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  async function fetchBreaks() {
+    const res = await fetch('/api/breaks');
+    const buses = await res.json();
+
+    const tbody = document.querySelector('#busTable tbody');
+    tbody.innerHTML = '';
+
+    buses.forEach(bus => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+          <td>${bus.name}</td>
+          <td>${bus.routeId}</td>
+          <td>${bus.stationaryFor}</td>
+          <td>${bus.totalBreak}</td>
+        `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // Update every 15 seconds
+  fetchBreaks();
+  setInterval(fetchBreaks, 15000);
+</script>
+</body>
+</html>
