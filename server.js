@@ -80,11 +80,12 @@ async function monitorBuses() {
           const duration = prev.stationaryFor;
           prev.totalBreakTime += duration;
 
-          prev.breaks.push({
-            startTime: prev.currentBreakStart,
-            endTime,
-            duration: Math.floor(duration)
-          });
+            prev.breaks.push({
+              startTime: prev.currentBreakStart,
+              endTime,
+              duration: Math.floor(duration)
+            });
+          }
 
           prev.onBreak = false;
           prev.currentBreakStart = null;
