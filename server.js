@@ -21,6 +21,22 @@ const BUS_API_URL = 'https://cwruuh.transloc.com/Services/JSONPRelay.svc/GetMapV
 
 const busTracker = {};
 
+const DEPOT_BOUNDS = {
+  minLat: 41.5088,
+  maxLat: 41.5107,
+  minLng: -81.619,
+  maxLng: -81.6154
+};
+
+function isInDepot(lat, lng) {
+  return (
+    lat >= DEPOT_BOUNDS.minLat &&
+    lat <= DEPOT_BOUNDS.maxLat &&
+    lng >= DEPOT_BOUNDS.minLng &&
+    lng <= DEPOT_BOUNDS.maxLng
+  );
+}
+
 function isSamePosition(pos1, pos2) {
   return (
     Math.abs(pos1.Latitude - pos2.Latitude) < POSITION_TOLERANCE &&
@@ -55,6 +71,8 @@ async function monitorBuses() {
       const prev = busTracker[id];
 
       const isSame = prev && isSamePosition(prev.position, bus);
+      const inDepot = isInDepot(bus.Latitude, bus.Longitude);
+
 
       if (!prev) {
         busTracker[id] = {
@@ -75,10 +93,11 @@ async function monitorBuses() {
         busTracker[id].stationaryFor += POLL_INTERVAL / 1000;
       } else {
         if (prev.onBreak) {
-          // End the break session
           const endTime = now;
           const duration = prev.stationaryFor;
-          prev.totalBreakTime += duration;
+
+          if (!isInDepot(prev.position.Latitude, prev.position.Longitude)) {
+            prev.totalBreakTime += duration;
 
             prev.breaks.push({
               startTime: prev.currentBreakStart,
@@ -100,7 +119,7 @@ async function monitorBuses() {
       prev.routeId = bus.RouteID;
 
       // Start a new break session if not already on break
-      if (!prev.onBreak && prev.stationaryFor >= BREAK_THRESHOLD) {
+      if (!prev.onBreak && prev.stationaryFor >= BREAK_THRESHOLD && !inDepot) {
         prev.onBreak = true;
         prev.currentBreakStart = now;
       }
