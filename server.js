@@ -28,6 +28,28 @@ const DEPOT_BOUNDS = {
   maxLng: -81.6154
 };
 
+const ROUTE_NAMES = {
+  9: 'South Loop',
+  33: 'NightLink',
+  41: 'UCRC',
+  14: 'KSL Express',
+  34: 'HEC After Hours',
+  7: 'Commuter AM',
+  19: 'A',
+  20: 'B',
+  21: 'C',
+  24: 'West Campus',
+  30: 'Out of Service',
+  10: 'Greenlink',
+  11: 'HEC Flyer',
+  12: 'HEC Main',
+  18: 'Nursing 1',
+  17: 'Nursing 2',
+
+  // Add others as needed
+};
+
+
 function isInDepot(lat, lng) {
   return (
     lat >= DEPOT_BOUNDS.minLat &&
