@@ -78,9 +78,16 @@
       if (markers[bus.vehicleId]) {
         markers[bus.vehicleId].setLatLng([bus.lat, bus.lng]);
       } else {
-        markers[bus.vehicleId] = L.marker([bus.lat, bus.lng], { icon: busIcon })
-          .addTo(map)
-          .bindPopup(`🚌 Bus ${bus.name}<br>Route: ${bus.routeName}`);
+        const icon = bus.onBreak ? breakBusIcon : activeBusIcon;
+
+        if (markers[bus.vehicleId]) {
+          markers[bus.vehicleId].setLatLng([bus.lat, bus.lng]);
+          markers[bus.vehicleId].setIcon(icon);
+        } else {
+          markers[bus.vehicleId] = L.marker([bus.lat, bus.lng], { icon })
+            .addTo(map)
+            .bindPopup(`🚌 Bus ${bus.name}<br>Route: ${bus.routeName}`);
+        }
       }
     });
   }
