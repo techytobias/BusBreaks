@@ -45,6 +45,49 @@
     });
   }
 
+  let map = L.map('map').setView([41.509, -81.617], 15);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap & Carto',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
+
+  let markers = {};
+  const busIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/8/8110.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
+  function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    const pad = num => String(num).padStart(2, '0');
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  async function fetchPositions() {
+    const res = await fetch('/api/positions');
+    const buses = await res.json();
+
+    // Update or create markers
+    buses.forEach(bus => {
+      if (markers[bus.vehicleId]) {
+        markers[bus.vehicleId].setLatLng([bus.lat, bus.lng]);
+      } else {
+        markers[bus.vehicleId] = L.marker([bus.lat, bus.lng], { icon: busIcon })
+          .addTo(map)
+          .bindPopup(`🚌 Bus ${bus.name}<br>Route: ${bus.routeName}`);
+      }
+    });
+  }
+
+  fetchPositions();
+  setInterval(fetchPositions, 15000);
+
   // Update every 15 seconds
   fetchBreaks();
   setInterval(fetchBreaks, 15000);
