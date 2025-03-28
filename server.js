@@ -39,6 +39,7 @@ const ROUTE_NAMES = {
   20: 'B',
   21: 'C',
   24: 'West Campus',
+  29: 'Charter',
   30: 'Out of Service',
   10: 'Greenlink',
   11: 'HEC Flyer',
