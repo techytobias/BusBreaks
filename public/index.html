@@ -9,14 +9,17 @@
       th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
       th { background-color: #f4f4f4; }
   </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 </head>
 <body>
 <h1>🚌 Buses Currently on Break</h1>
 <table id="busTable">
   <thead>
   <tr>
-    <th>Bus Name</th>
-    <th>Route ID</th>
+    <th>Bus Number</th>
+    <th>Route</th>
     <th>Break Duration (seconds)</th>
     <th>Total Break Time (sec)</th>
   </tr>
@@ -24,7 +27,7 @@
   <tbody></tbody>
 </table>
 <h2>🗺️ Live Bus Map</h2>
-<div id="map" style="height: 400px;"></div>
+<div id="map" style="height: 600px;"></div>
 <script>
   async function fetchBreaks() {
     const res = await fetch('/api/breaks');
@@ -37,9 +40,9 @@
       const row = document.createElement('tr');
       row.innerHTML = `
           <td>${bus.name}</td>
-          <td>${bus.routeId}</td>
-          <td>${bus.currentBreak}</td>
-          <td>${bus.totalBreak}</td>
+          <td>${bus.routeName}</td>
+          <td>${formatTime(bus.currentBreak)}</td>
+          <td>${formatTime(bus.totalBreak)}</td>
         `;
       tbody.appendChild(row);
     });
@@ -53,8 +56,15 @@
   }).addTo(map);
 
   let markers = {};
-  const busIcon = L.icon({
+  const activeBusIcon = L.icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/8/8110.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
+  const breakBusIcon = L.icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/252/252025.png', // red marker bus icon
     iconSize: [32, 32],
     iconAnchor: [16, 32],
     popupAnchor: [0, -32]
@@ -75,9 +85,6 @@
 
     // Update or create markers
     buses.forEach(bus => {
-      if (markers[bus.vehicleId]) {
-        markers[bus.vehicleId].setLatLng([bus.lat, bus.lng]);
-      } else {
         const icon = bus.onBreak ? breakBusIcon : activeBusIcon;
 
         if (markers[bus.vehicleId]) {
@@ -88,7 +95,6 @@
             .addTo(map)
             .bindPopup(`🚌 Bus ${bus.name}<br>Route: ${bus.routeName}`);
         }
-      }
     });
   }
 

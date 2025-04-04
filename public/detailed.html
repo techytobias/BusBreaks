@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Detailed Break Display</title>
+  <style>
+      body { font-family: sans-serif; padding: 20px; }
+      h1 { margin-bottom: 10px; }
+      table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+      th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+      th { background-color: #f4f4f4; }
+      tr.breaking { background-color: #ffecec; }
+  </style>
+</head>
+<body>
+<h1>Detailed Break Display</h1>
+<table>
+  <thead>
+  <tr>
+    <th>Bus Name</th>
+    <th>Route</th>
+    <th>Currently on Break</th>
+    <th>Break Time (Past 2 Hours)</th>
+    <th>Break Time (Past 4 Hours)</th>
+  </tr>
+  </thead>
+  <tbody id="breakTableBody">
+  </tbody>
+</table>
+
+<script>
+  function formatTime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+
+  async function loadBreakData() {
+    const res = await fetch('/api/detailed-breaks');
+    const data = await res.json();
+
+    const tbody = document.getElementById('breakTableBody');
+    tbody.innerHTML = '';
+
+    data.forEach(bus => {
+      const row = document.createElement('tr');
+      if (bus.onBreak) {
+        row.classList.add('breaking');
+      }
+
+      row.innerHTML = `
+          <td>${bus.name}</td>
+          <td>${bus.routeName}</td>
+          <td>${bus.onBreak ? '✅ Yes' : '— No'}</td>
+          <td>${formatTime(bus.breakTime2h)}</td>
+          <td>${formatTime(bus.breakTime4h)}</td>
+        `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+  loadBreakData();
+  setInterval(loadBreakData, 15000);
+</script>
+</body>
+</html>
